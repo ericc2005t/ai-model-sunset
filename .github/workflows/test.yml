@@ -1,0 +1,29 @@
+name: test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # the action itself, on the test fixtures; never opens issues here
+      - id: scan
+        uses: ./
+        with:
+          path: test/fixtures/app
+          issue-days: -1
+      - run: test "${{ steps.scan.outputs.count }}" -ge 1

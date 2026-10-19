@@ -1,0 +1,55 @@
+name: 'AI model sunset check'
+description: 'Finds OpenAI and Anthropic models in your code that are being switched off and opens an issue before the date.'
+author: 'Promti'
+branding:
+  icon: 'alert-triangle'
+  color: 'orange'
+inputs:
+  path:
+    description: 'Folder to scan, relative to the workspace.'
+    default: '.'
+  issue-days:
+    description: 'Open (or update) an issue when a model shuts down within this many days, and close it when none does. -1 = never open issues.'
+    default: '60'
+  fail-days:
+    description: 'Fail the job when a model is already off or shuts down within this many days. Empty = never fail.'
+    default: ''
+  lang:
+    description: 'Language of the issue and the summary: en or es.'
+    default: 'en'
+  include-docs:
+    description: 'Also scan .md, .mdx, .txt and .rst files.'
+    default: 'false'
+  token:
+    description: 'Token used to open the issue. Needs `issues: write`.'
+    default: ${{ github.token }}
+outputs:
+  count:
+    description: 'How many models with a shutdown date were found.'
+    value: ${{ steps.scan.outputs.count }}
+  soonest-date:
+    description: 'The soonest shutdown date found (YYYY-MM-DD), or empty.'
+    value: ${{ steps.scan.outputs.soonest-date }}
+  soonest-days:
+    description: 'Days until that date (0 or less = already off), or empty.'
+    value: ${{ steps.scan.outputs.soonest-days }}
+  models:
+    description: 'The models found, comma-separated, soonest first.'
+    value: ${{ steps.scan.outputs.models }}
+runs:
+  using: 'composite'
+  steps:
+    - id: scan
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        SCAN_PATH: ${{ inputs.path }}
+        ISSUE_DAYS: ${{ inputs.issue-days }}
+        FAIL_DAYS: ${{ inputs.fail-days }}
+        SCAN_LANG: ${{ inputs.lang }}
+        INCLUDE_DOCS: ${{ inputs.include-docs }}
+      run: |
+        args=("$SCAN_PATH" --github --lang "$SCAN_LANG" --issue-within "$ISSUE_DAYS")
+        if [ -n "$FAIL_DAYS" ]; then args+=(--fail-within "$FAIL_DAYS"); fi
+        if [ "$INCLUDE_DOCS" = "true" ]; then args+=(--include-docs); fi
+        node "$GITHUB_ACTION_PATH/bin/ai-model-sunset.mjs" "${args[@]}"

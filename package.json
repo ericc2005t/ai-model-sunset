@@ -1,0 +1,27 @@
+{
+  "name": "ai-model-sunset",
+  "version": "1.0.0",
+  "description": "Find the OpenAI and Anthropic models in your code that are being switched off, with the date and the official replacement. No dependencies, nothing sent anywhere.",
+  "type": "module",
+  "bin": {
+    "ai-model-sunset": "bin/ai-model-sunset.mjs"
+  },
+  "files": [
+    "bin/",
+    "models.json",
+    "action.yml"
+  ],
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["openai", "anthropic", "claude", "gpt", "deprecation", "sunset", "shutdown", "llm", "github-action", "cli"],
+  "homepage": "https://github.com/ericc2005t/ai-model-sunset#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericc2005t/ai-model-sunset.git"
+  },
+  "license": "MIT"
+}
